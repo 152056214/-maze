@@ -1,0 +1,97 @@
+import flash.display.MovieClip;
+import flash.display.BitmapData;
+import flash.display.Bitmap;
+import flash.events.MouseEvent;
+var bmpd: BitmapData = new BitmapData(stage.stageWidth, stage.stageHeight);
+
+var ss: MovieClip = this.mc;
+var lastx: Number = ss.x;
+var lasty: Number = ss.y;
+var black: String = null;
+//两个参数，原来位置和点击位置，只算x和y的移动距离
+function quzheng(w: Number, q: Number): Number {
+	var temp: int = 1;
+	//trace(a,b);
+	temp = Math.round((w - q) / 12);
+	//这是移动的距离，整格移动，为12的倍数
+	var movex: int = temp * 12;
+	return movex;
+
+}
+function yidong(lastx: Number, lasty: Number, mousex: Number, mousey: Number): Number {
+	if (Math.abs(lastx - mousex) > Math.abs(lasty - mousey)) {
+		var temp: int;
+		temp = Math.round((mousex - lastx) / 12);
+		//确定循环次数
+		exit: for (var i: int = 1; i <= Math.abs(temp); i++) {
+			//temp为负，就反向找坐标，并返回颜色值
+			if (temp < 0) {
+				black = color(lastx + i * (-1) * 12, lasty)
+			} else {
+				black = color(lastx + i * 12, lasty);
+			}
+			//碰到黑色
+			if (black == "0") {
+				//trace("333");
+				if (temp < 0) {
+					var movey: int = (i - 1) * 12 * (-1);
+				} else {
+					movey = (i - 1) * 12;
+				}
+				trace("temp:" + temp);
+				trace("循环次数:" + i);
+				break exit;
+			}
+			if (temp < 0) {
+				movey = i * 12 * (-1);
+			} else {
+				movey = i * 12;
+			}
+		}
+	} else {
+		temp = Math.round((mousey - lasty) / 12);
+		exitLoop: for (var j: int = 1; j <= Math.abs(temp); j++) {
+			if (temp < 0) {
+				black = color(lastx, lasty + j * (-1) * 12)
+			} else {
+				black = color(lastx, lasty + j * 12);
+			}
+			//var bb:Number = color(a,b);
+			if (black == "0") {
+				//移动的距离
+				if (temp < 0) {
+					movey = (j - 1) * 12 * (-1);
+				} else {
+					movey = (j - 1) * 12;
+				}
+				trace("temp:" + temp);
+				trace("循环次数:" + j);
+				break exitLoop;
+			}
+			if (temp < 0) {
+				movey = j * 12 * (-1);
+			} else {
+				movey = j * 12;
+			}
+		}
+	}
+	trace(movey);
+	return movey;
+}
+bmpd.draw(stage);
+function color(posix: Number, posiy: Number): String {
+	var yanse: String = bmpd.getPixel(posix, posiy).toString(16);
+	return yanse;
+}
+stage.addEventListener(MouseEvent.CLICK, move);
+function move(e: MouseEvent): void {
+	//判断往哪个方向移动，x，y方向移动距离取绝对值，往大的方向移
+	if (Math.abs(quzheng(mouseX, lastx)) >= Math.abs(quzheng(mouseY, lasty))) {
+		//原来位置+要移动的距离，是移动后的位置
+		ss.x = lastx + yidong(lastx, lasty, mouseX, mouseY);
+		lastx = ss.x;
+	} else {
+		ss.y = lasty + yidong(lastx, lasty, mouseX, mouseY);
+		lasty = ss.y;
+	}
+}
